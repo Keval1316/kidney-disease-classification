@@ -1,0 +1,15 @@
+.git
+.venv
+venv
+data/raw
+data/processed
+data/external
+.dvc/cache
+notebooks
+mlruns
+*.pyc
+__pycache__/
+.env
+tests
+reports
+artifacts/*.zip
