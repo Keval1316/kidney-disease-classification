@@ -1,0 +1,6 @@
+[core]
+    remote = origin
+['remote "origin"']
+    url = https://dagshub.com/Keval1316/kidney-disease-classification.dvc
+    jobs = 2
+

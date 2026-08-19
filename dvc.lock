@@ -1,0 +1,19 @@
+schema: '2.0'
+stages:
+  download:
+    cmd: python -m src.data.download
+    deps:
+    - path: config/config.yaml
+      hash: md5
+      md5: dd870c2fbda07843d589e59e0cbd2dc1
+      size: 430
+    - path: src/data/download.py
+      hash: md5
+      md5: 64b7288a951c399e7a9b7dd1c9643bd4
+      size: 5550
+    outs:
+    - path: data/raw
+      hash: md5
+      md5: 094052c2b2a1024516e90b549d39a3fe.dir
+      size: 1663086237
+      nfiles: 12448
