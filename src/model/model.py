@@ -16,9 +16,17 @@ def build_model(
     trainable_layers: int = 0,
 ) -> tf.keras.Model:
     """
-    Builds EfficientNetB0 with a frozen backbone (default) and a custom
-    classification head. If fine_tune_enabled, unfreezes the last
-    `trainable_layers` layers of the backbone.
+    Builds EfficientNetB0 with a frozen backbone and a richer classification
+    head. Fine-tuning (unfreezing the last N backbone layers) is applied
+    separately in the training script AFTER a warm-up phase so that the new
+    random head weights don't destroy pretrained backbone features on epoch 1.
+
+    Head architecture:
+        GlobalAveragePooling2D
+        → BatchNormalization
+        → Dense(256, relu)
+        → Dropout(dropout)
+        → Dense(num_classes, softmax)
     """
     base_model = tf.keras.applications.EfficientNetB0(
         include_top=False,
@@ -26,22 +34,47 @@ def build_model(
         input_shape=(image_size, image_size, 3),
     )
 
-    base_model.trainable = fine_tune_enabled
-    if fine_tune_enabled and trainable_layers > 0:
-        # freeze everything except the last N layers
-        for layer in base_model.layers[:-trainable_layers]:
-            layer.trainable = False
-        logger.info(f"Fine-tuning enabled: last {trainable_layers} backbone layers trainable.")
-    elif not fine_tune_enabled:
-        logger.info("Backbone frozen (fine_tune_enabled=False) — training classification head only.")
+    # Always start with a fully frozen backbone; fine-tuning is enabled
+    # explicitly in the training script after the warm-up phase completes.
+    base_model.trainable = False
+    logger.info("Backbone frozen — will be partially unfrozen after warm-up.")
 
     inputs = tf.keras.Input(shape=(image_size, image_size, 3))
-    x = base_model(inputs, training=fine_tune_enabled)
+    # Pass training=False so BatchNorm layers inside EfficientNet always run in
+    # inference mode during warm-up (avoids running mean/variance corruption).
+    x = base_model(inputs, training=False)
     x = tf.keras.layers.GlobalAveragePooling2D()(x)
+    x = tf.keras.layers.BatchNormalization()(x)
+    x = tf.keras.layers.Dense(256, activation="relu")(x)
     x = tf.keras.layers.Dropout(dropout)(x)
     outputs = tf.keras.layers.Dense(num_classes, activation="softmax")(x)
 
     model = tf.keras.Model(inputs, outputs, name="kidney_efficientnetb0")
+    return model
+
+
+def enable_fine_tuning(
+    model: tf.keras.Model,
+    trainable_layers: int,
+) -> tf.keras.Model:
+    """
+    Unfreezes the last `trainable_layers` layers of the EfficientNetB0
+    backbone. Call this AFTER the warm-up phase is complete, then recompile
+    with a lower learning rate before continuing training.
+    """
+    # The backbone is always the second layer of our functional model
+    base_model = model.layers[1]
+    base_model.trainable = True
+
+    # Freeze everything except the last N layers
+    for layer in base_model.layers[:-trainable_layers]:
+        layer.trainable = False
+
+    trainable_count = sum(1 for l in base_model.layers if l.trainable)
+    logger.info(
+        f"Fine-tuning enabled: {trainable_count} backbone layers now trainable "
+        f"(last {trainable_layers} of {len(base_model.layers)})."
+    )
     return model
 
 
