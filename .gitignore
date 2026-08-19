@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Env & secrets
+.env
+
+# Data & models
+data/raw/
+data/processed/
+data/external/
+artifacts/
+*.h5
+*.keras
+mlruns/
+
+# DVC
+/data/raw.dvc.lock
+
+# Reports (generated)
+reports/figures/*
+reports/metrics/*
+!reports/figures/.gitkeep
+!reports/metrics/.gitkeep
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/

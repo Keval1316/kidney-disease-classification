@@ -1,0 +1,22 @@
+project:
+  name: kidney-disease-classification
+  seed: 42
+
+data:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  expected_classes: ["Normal", "Cyst", "Tumor", "Stone"]
+  kaggle_dataset: "nazmul0087/ct-kidney-dataset-normal-cyst-tumor-and-stone"
+
+split:
+  train_ratio: 0.70
+  val_ratio: 0.15
+  test_ratio: 0.15
+
+image:
+  size: 224
+  channels: 3
+
+paths:
+  model_dir: artifacts/model
+  reports_dir: reports

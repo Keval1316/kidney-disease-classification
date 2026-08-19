@@ -1,0 +1,18 @@
+seed: 42
+
+model:
+  name: EfficientNetB0
+  image_size: 224
+  dropout: 0.3
+  trainable_layers: 0
+  fine_tune_enabled: false
+
+train:
+  batch_size: 32
+  epochs: 20
+  learning_rate: 0.0001
+  optimizer: adam
+  augmentation: true
+
+mlflow:
+  experiment_name: kidney-disease-classification
