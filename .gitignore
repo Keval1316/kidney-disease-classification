@@ -34,3 +34,7 @@ Thumbs.db
 
 # Jupyter
 .ipynb_checkpoints/
+
+# Logs (runtime output, not committed)
+logs/*.log
+logs/*.log.*
