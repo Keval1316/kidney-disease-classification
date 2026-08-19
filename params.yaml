@@ -4,13 +4,15 @@ model:
   name: EfficientNetB0
   image_size: 224
   dropout: 0.3
-  trainable_layers: 0
-  fine_tune_enabled: false
+  trainable_layers: 30
+  fine_tune_enabled: true
 
 train:
   batch_size: 32
-  epochs: 20
-  learning_rate: 0.0001
+  epochs: 30
+  learning_rate: 0.00005
+  warmup_epochs: 8
+  warmup_lr: 0.001
   optimizer: adam
   augmentation: true
 
