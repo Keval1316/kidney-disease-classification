@@ -1,0 +1,66 @@
+stages:
+  download:
+    cmd: python -m src.data.download
+    deps:
+      - src/data/download.py
+      - config/config.yaml
+    outs:
+      - data/raw:
+          cache: false
+
+  validate:
+    cmd: python -m src.data.validate
+    deps:
+      - src/data/validate.py
+      - data/raw
+      - config/config.yaml
+    outs:
+      - reports/metrics/dataset_summary.json
+
+  split:
+    cmd: python -m src.data.split
+    deps:
+      - src/data/split.py
+      - data/raw
+      - config/config.yaml
+    params:
+      - project.seed
+      - split.train_ratio
+      - split.val_ratio
+      - split.test_ratio
+    outs:
+      - data/processed/splits.json
+
+  train:
+    cmd: python -m src.training.train
+    deps:
+      - src/training/train.py
+      - src/preprocessing/preprocessing.py
+      - src/model/model.py
+      - src/model/callbacks.py
+      - data/processed/splits.json
+      - config/config.yaml
+      - params.yaml
+    params:
+      - seed
+      - model
+      - train
+    outs:
+      - artifacts/model/best_model.keras
+      - artifacts/model/final_model.keras
+    metrics:
+      - reports/metrics/training_history.json:
+          cache: false
+
+  evaluate:
+    cmd: python -m src.evaluation.evaluate
+    deps:
+      - src/evaluation/evaluate.py
+      - artifacts/model/best_model.keras
+      - data/processed/splits.json
+    outs:
+      - reports/metrics/test_predictions.json
+      - reports/figures/confusion_matrix.png
+    metrics:
+      - reports/metrics/metrics.json:
+          cache: false
