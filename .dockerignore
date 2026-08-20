@@ -1,15 +1,42 @@
+# Git & Virtual Environment
 .git
+.gitignore
 .venv
-venv
-data/raw
-data/processed
-data/external
-.dvc/cache
-notebooks
-mlruns
-*.pyc
+venv/
+env/
 __pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Raw & Processed Datasets (keep container image small)
+data/raw/
+data/processed/
+data/external/
+*.csv
+
+# DVC & MLflow local caches
+.dvc/
+.dvcignore
+mlruns/
+.mlflow/
+
+# Notebooks & Tests
+notebooks/
+tests/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local logs & reports
+logs/
+reports/
+*.log
+
+# Environment variables & secrets
 .env
-tests
-reports
-artifacts/*.zip
+.env.*
+!.env.example
+
+# App frontend (Streamlit deployed separately on Streamlit Cloud)
+app/

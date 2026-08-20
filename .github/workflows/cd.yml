@@ -1,0 +1,57 @@
+name: CD Pipeline (Render Deployment)
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  workflow_dispatch:
+
+jobs:
+  deploy-to-render:
+    name: Trigger Render Continuous Deployment
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to Render via Webhook
+        env:
+          DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$DEPLOY_HOOK_URL" ]; then
+            echo "::warning ::RENDER_DEPLOY_HOOK_URL is not configured in GitHub Secrets. Skipping automatic deployment hook."
+            exit 0
+          fi
+          
+          echo "Triggering Render deployment webhook..."
+          HTTP_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$DEPLOY_HOOK_URL")
+          
+          if [ "$HTTP_RESPONSE" -eq 200 ] || [ "$HTTP_RESPONSE" -eq 201 ]; then
+            echo "Render deployment triggered successfully (HTTP $HTTP_RESPONSE)."
+          else
+            echo "::error ::Render deploy hook returned unexpected status: $HTTP_RESPONSE"
+            exit 1
+          fi
+
+      - name: Verify Live Service Health
+        env:
+          SERVICE_URL: ${{ secrets.RENDER_SERVICE_URL }}
+        run: |
+          if [ -z "$SERVICE_URL" ]; then
+            echo "::notice ::RENDER_SERVICE_URL secret not set. Skipping live health verification."
+            exit 0
+          fi
+          
+          echo "Waiting for service to become healthy at $SERVICE_URL/health..."
+          # Render free tier container cold starts can take 30-60 seconds to pull and boot
+          for i in {1..12}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$SERVICE_URL/health" || true)
+            echo "Attempt $i: Health check status $STATUS"
+            if [ "$STATUS" -eq 200 ]; then
+              echo "FastAPI service is healthy and live!"
+              exit 0
+            fi
+            sleep 10
+          done
+          
+          echo "::warning ::Service health check timed out. Please verify the Render dashboard logs."
