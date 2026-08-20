@@ -24,10 +24,11 @@ stages:
       - data/raw
       - config/config.yaml
     params:
-      - project.seed
-      - split.train_ratio
-      - split.val_ratio
-      - split.test_ratio
+      - config/config.yaml:
+          - project.seed
+          - split.train_ratio
+          - split.val_ratio
+          - split.test_ratio
     outs:
       - data/processed/splits.json
 
