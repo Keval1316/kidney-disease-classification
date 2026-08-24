@@ -46,27 +46,27 @@ Built with **EfficientNetB0** transfer learning, **DVC** data and pipeline versi
 
 ```mermaid
 flowchart TD
-    subgraph Data & Pipeline Versioning (DVC)
-        A[Kaggle CT Dataset] --> B[Data Validation & Integrity]
-        B --> C[Stratified 70/15/15 Split]
-        C --> D[tf.data Augmentation & Preprocessing]
+    subgraph Data_Pipeline ["Data & Pipeline Versioning (DVC)"]
+        A["Kaggle CT Dataset"] --> B["Data Validation & Integrity"]
+        B --> C["Stratified 70/15/15 Split"]
+        C --> D["tf.data Augmentation & Preprocessing"]
     end
 
-    subgraph Deep Learning & Tracking
-        D --> E[EfficientNetB0 Backbone]
-        E --> F[Training Pipeline with Callbacks]
-        F <--> G[(MLflow / DagsHub)]
-        F --> H[artifacts/model/best_model.keras]
+    subgraph DL_Tracking ["Deep Learning & Experiment Tracking"]
+        D --> E["EfficientNetB0 Backbone"]
+        E --> F["Training Pipeline with Callbacks"]
+        F <--> G[("MLflow / DagsHub")]
+        F --> H["artifacts/model/best_model.keras"]
     end
 
-    subgraph Serving & Frontend
-        H --> I[FastAPI Async Backend]
-        I --> J[REST Endpoints /predict, /health]
-        I --> K[Interactive Web UI /ui]
+    subgraph Serving_Backend ["Serving & Backend API"]
+        H --> I["FastAPI Async Backend"]
+        I --> J["REST Endpoints (/predict, /health)"]
+        I --> K["Interactive Web UI"]
     end
 
-    subgraph Client Application
-        L[Web Browser User] <--> K
+    subgraph Client_App ["Client & Interface"]
+        L["Web Browser User"] <--> K
         L <--> J
     end
 ```
