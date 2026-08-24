@@ -84,5 +84,25 @@ def test_predict_empty_file(client):
         files={"file": ("empty.jpg", b"", "image/jpeg")},
     )
     assert response.status_code == 400
-    data = response.json()
-    assert "empty" in data["detail"]
+    assert "empty" in response.json()["detail"]
+
+
+def test_ui_endpoint(client):
+    """GET /ui should return 200 with HTML content."""
+    response = client.get("/ui")
+    assert response.status_code == 200
+    assert "text/html" in response.headers.get("content-type", "")
+    assert "NephroScan AI" in response.text
+
+
+def test_static_css_and_js_served(client):
+    """GET /css/style.css and /js/app.js should return 200."""
+    css_res = client.get("/css/style.css")
+    assert css_res.status_code == 200
+    assert "#EDEFF0" in css_res.text
+    assert "#B3D9E5" in css_res.text
+    assert "#30474E" in css_res.text
+
+    js_res = client.get("/js/app.js")
+    assert js_res.status_code == 200
+    assert "NephroScan AI" in js_res.text

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NephroScan AI — CT Kidney Disease Classifier</title>
+    <meta name="description" content="Production Deep Learning Diagnostic Intelligence for axial Kidney CT image classification using EfficientNetB0.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Top Navigation / Header -->
+        <header class="top-nav">
+            <div class="nav-brand">
+                <div class="brand-icon-wrapper">
+                    <i data-lucide="activity" class="brand-icon"></i>
+                </div>
+                <div class="brand-text">
+                    <div class="brand-title-row">
+                        <h1>NephroScan AI</h1>
+                        <span class="badge-tag">EfficientNetB0</span>
+                    </div>
+                    <p class="brand-subtitle">Deep Learning Renal CT Diagnostic System</p>
+                </div>
+            </div>
+
+            <div class="nav-actions">
+                <!-- Live Backend Connection Status Indicator -->
+                <div class="status-pill" id="backendStatusPill" title="Checking inference engine status...">
+                    <span class="status-dot pinging" id="statusDot"></span>
+                    <span class="status-label" id="statusLabel">Connecting to API...</span>
+                    <span class="latency-tag" id="latencyTag">-- ms</span>
+                </div>
+
+                <!-- API Docs link -->
+                <a href="/docs" target="_blank" class="nav-btn" title="Open Swagger API Documentation" id="navDocsBtn">
+                    <i data-lucide="book-open"></i>
+                    <span>API Docs</span>
+                </a>
+
+                <!-- Settings Toggle Button -->
+                <button class="nav-btn icon-only" id="btnOpenSettings" title="API Configuration">
+                    <i data-lucide="settings"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="main-container">
+            <!-- Left Column: Input & CT Image Management -->
+            <section class="panel input-panel">
+                <div class="panel-header">
+                    <div class="panel-header-title">
+                        <i data-lucide="scan" class="panel-icon"></i>
+                        <h2>CT Scan Input</h2>
+                    </div>
+                    <span class="badge-pill">Step 1</span>
+                </div>
+
+                <!-- Drag & Drop Zone -->
+                <div class="drop-zone" id="dropZone">
+                    <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.bmp,.tif,.tiff" class="file-input-hidden">
+                    
+                    <div class="drop-prompt" id="dropPrompt">
+                        <div class="upload-icon-circle">
+                            <i data-lucide="upload-cloud"></i>
+                        </div>
+                        <h3>Upload Axial CT Slice</h3>
+                        <p class="upload-subtext">Drag & drop or <span class="browse-link">browse files</span></p>
+                        <div class="format-tags">
+                            <span>JPG</span>
+                            <span>PNG</span>
+                            <span>BMP</span>
+                            <span>TIFF</span>
+                            <span class="max-size">Max 10MB</span>
+                        </div>
+                    </div>
+
+                    <!-- Image Preview Viewport -->
+                    <div class="preview-container hidden" id="previewContainer">
+                        <div class="scanner-line hidden" id="scannerLine"></div>
+                        <img id="imagePreview" alt="CT Scan Preview" class="preview-img">
+                        <div class="preview-overlay-info">
+                            <span id="previewDimensions">-- × -- px</span>
+                            <span id="previewSize">-- KB</span>
+                        </div>
+                        <button class="remove-btn" id="btnRemoveImage" title="Remove image">
+                            <i data-lucide="x"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sample CT Scans Gallery (1-Click Test) -->
+                <div class="samples-section">
+                    <div class="samples-header">
+                        <span class="samples-title">
+                            <i data-lucide="layers"></i>
+                            Or choose a sample CT scan:
+                        </span>
+                    </div>
+                    <div class="sample-grid">
+                        <button class="sample-card" data-sample="normal" data-path="samples/normal_sample.jpg" data-label="Normal">
+                            <div class="sample-thumb-wrapper">
+                                <img src="samples/normal_sample.jpg" alt="Normal Sample" loading="lazy">
+                                <span class="sample-tag tag-normal">Normal</span>
+                            </div>
+                            <span class="sample-name">Healthy Slice</span>
+                        </button>
+
+                        <button class="sample-card" data-sample="cyst" data-path="samples/cyst_sample.jpg" data-label="Cyst">
+                            <div class="sample-thumb-wrapper">
+                                <img src="samples/cyst_sample.jpg" alt="Cyst Sample" loading="lazy">
+                                <span class="sample-tag tag-cyst">Cyst</span>
+                            </div>
+                            <span class="sample-name">Renal Cyst</span>
+                        </button>
+
+                        <button class="sample-card" data-sample="stone" data-path="samples/stone_sample.jpg" data-label="Stone">
+                            <div class="sample-thumb-wrapper">
+                                <img src="samples/stone_sample.jpg" alt="Stone Sample" loading="lazy">
+                                <span class="sample-tag tag-stone">Stone</span>
+                            </div>
+                            <span class="sample-name">Kidney Stone</span>
+                        </button>
+
+                        <button class="sample-card" data-sample="tumor" data-path="samples/tumor_sample.jpg" data-label="Tumor">
+                            <div class="sample-thumb-wrapper">
+                                <img src="samples/tumor_sample.jpg" alt="Tumor Sample" loading="lazy">
+                                <span class="sample-tag tag-tumor">Tumor</span>
+                            </div>
+                            <span class="sample-name">Renal Mass</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Analysis Action Trigger -->
+                <div class="action-footer">
+                    <button class="btn-primary" id="btnAnalyze" disabled>
+                        <span class="btn-content">
+                            <i data-lucide="zap" class="btn-icon"></i>
+                            <span id="analyzeBtnText">Run Diagnostic Analysis</span>
+                        </span>
+                        <div class="spinner hidden" id="analyzeSpinner"></div>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Right Column: Diagnostic Inference Results -->
+            <section class="panel results-panel" id="resultsPanel">
+                <div class="panel-header">
+                    <div class="panel-header-title">
+                        <i data-lucide="clipboard-check" class="panel-icon"></i>
+                        <h2>Diagnostic Assessment</h2>
+                    </div>
+                    <span class="badge-pill">Step 2</span>
+                </div>
+
+                <!-- Initial Empty Placeholder State -->
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-illustration">
+                        <i data-lucide="microscope" class="empty-icon"></i>
+                    </div>
+                    <h3>Ready for Image Analysis</h3>
+                    <p>Upload a kidney CT scan slice or pick a sample preset to run real-time classification across Cyst, Normal, Stone, and Tumor classes.</p>
+                </div>
+
+                <!-- Active Results Content (Hidden by default) -->
+                <div class="results-content hidden" id="resultsContent">
+                    <!-- Primary Prediction Banner -->
+                    <div class="prediction-headline-card" id="headlineCard">
+                        <div class="headline-header">
+                            <span class="headline-label">Primary Diagnostic Finding</span>
+                            <span class="inference-time-badge" id="inferenceTimeBadge">
+                                <i data-lucide="timer"></i> <span id="inferenceTimeVal">--</span>
+                            </span>
+                        </div>
+                        
+                        <div class="prediction-main-row">
+                            <div class="prediction-badge-lg" id="predClassBadge">
+                                <i data-lucide="check-circle" id="predClassIcon"></i>
+                                <span id="predClassName">--</span>
+                            </div>
+                            <div class="confidence-stat">
+                                <div class="confidence-val-row">
+                                    <span class="confidence-num" id="confidenceVal">--%</span>
+                                    <span class="confidence-sub">Confidence</span>
+                                </div>
+                                <div class="confidence-mini-bar">
+                                    <div class="confidence-mini-fill" id="confidenceMiniFill"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="prediction-clinical-summary" id="clinicalSummary">--</p>
+                    </div>
+
+                    <!-- Softmax Probability Distribution -->
+                    <div class="distribution-section">
+                        <div class="section-title-row">
+                            <h3><i data-lucide="bar-chart-2"></i> Class Probability Distribution</h3>
+                            <span class="section-hint">EfficientNetB0 Softmax</span>
+                        </div>
+
+                        <div class="prob-bars-container" id="probBarsContainer">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Diagnostic Clinical Insights -->
+                    <div class="insights-card" id="insightsCard">
+                        <div class="insights-header">
+                            <i data-lucide="info"></i>
+                            <h4>Pathological Reference</h4>
+                        </div>
+                        <p class="insights-text" id="insightsText">--</p>
+                    </div>
+
+                    <!-- Action Bar: Export & Reset -->
+                    <div class="results-action-bar">
+                        <button class="btn-secondary" id="btnCopyReport" title="Copy diagnosis to clipboard">
+                            <i data-lucide="copy"></i>
+                            <span id="copyReportText">Copy Report</span>
+                        </button>
+                        <button class="btn-secondary" id="btnDownloadReport" title="Download JSON Diagnostic File">
+                            <i data-lucide="download"></i>
+                            <span>Export JSON</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Error State Container -->
+                <div class="error-banner hidden" id="errorBanner">
+                    <div class="error-icon-box">
+                        <i data-lucide="alert-triangle"></i>
+                    </div>
+                    <div class="error-text-content">
+                        <h4 id="errorTitle">Analysis Error</h4>
+                        <p id="errorMessage">Could not complete diagnostic inference.</p>
+                    </div>
+                    <button class="error-dismiss" id="btnDismissError"><i data-lucide="x"></i></button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Mandatory Medical & Safety Disclaimer -->
+        <footer class="disclaimer-footer">
+            <div class="disclaimer-inner">
+                <div class="disclaimer-icon-col">
+                    <i data-lucide="shield-alert" class="disclaimer-shield"></i>
+                </div>
+                <div class="disclaimer-body">
+                    <span class="disclaimer-title">Medical Safety & Educational Notice</span>
+                    <p>
+                        This system is designed exclusively for educational, academic, and research demonstration. 
+                        It is <strong>NOT</strong> an FDA/CE-certified diagnostic medical device and must never be utilized 
+                        for clinical decision-making, patient diagnosis, or treatment planning. All medical interpretations 
+                        must be conducted by a board-certified radiologist or qualified healthcare physician.
+                    </p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- API Settings Modal -->
+    <div class="modal-backdrop hidden" id="settingsModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-title-row">
+                    <i data-lucide="sliders"></i>
+                    <h3>Inference Backend Settings</h3>
+                </div>
+                <button class="modal-close" id="btnCloseSettings"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="apiUrlInput">FastAPI Backend Endpoint URL</label>
+                    <input type="url" id="apiUrlInput" class="form-control" placeholder="http://127.0.0.1:8000">
+                    <small class="form-help">Default: Same host origin. Use full URL if hosting decoupled.</small>
+                </div>
+                
+                <div class="modal-details">
+                    <div class="detail-row">
+                        <span>API Status:</span>
+                        <strong id="modalApiStatus">Checking...</strong>
+                    </div>
+                    <div class="detail-row">
+                        <span>Model Weights:</span>
+                        <strong id="modalModelStatus">Checking...</strong>
+                    </div>
+                    <div class="detail-row">
+                        <span>Supported Classes:</span>
+                        <span>Cyst, Normal, Stone, Tumor</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="btnResetApiUrl">Reset to Default</button>
+                <button class="btn-primary" id="btnSaveSettings">Save & Reconnect</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script src="js/app.js"></script>
+</body>
+</html>

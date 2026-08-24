@@ -17,16 +17,23 @@ Classes:
 
 import os
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Dict
 
 from fastapi import FastAPI, File, HTTPException, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from src.inference.predict import CLASS_NAMES, load_model_cached, predict_image
 from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
+
+# Directory paths
+BASE_DIR = Path(__file__).resolve().parent.parent
+APP_DIR = BASE_DIR / "app"
 
 # ---------------------------------------------------------------------------
 # Constants & Configuration
@@ -75,6 +82,7 @@ class RootResponse(BaseModel):
     version: str
     docs_url: str
     health_url: str
+    ui_url: str = "/ui"
     disclaimer: str
 
 
@@ -113,7 +121,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Enable CORS for frontend clients (Streamlit, React, etc.)
+# Enable CORS for frontend clients (HTML/JS, React, etc.)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -121,6 +129,31 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Mount static files and UI if app directory exists
+if APP_DIR.exists():
+    if (APP_DIR / "css").exists():
+        app.mount("/css", StaticFiles(directory=str(APP_DIR / "css")), name="css")
+    if (APP_DIR / "js").exists():
+        app.mount("/js", StaticFiles(directory=str(APP_DIR / "js")), name="js")
+    if (APP_DIR / "samples").exists():
+        app.mount("/samples", StaticFiles(directory=str(APP_DIR / "samples")), name="samples")
+    app.mount("/app", StaticFiles(directory=str(APP_DIR), html=True), name="app")
+
+
+# ---------------------------------------------------------------------------
+# Route: Web UI
+# ---------------------------------------------------------------------------
+@app.get("/ui", response_class=FileResponse, tags=["Frontend"], summary="Interactive Diagnostic Web UI")
+async def serve_ui():
+    """Serve the modern HTML5/CSS3/JavaScript web interface."""
+    index_file = APP_DIR / "index.html"
+    if not index_file.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Web UI assets not found. Please ensure app/index.html exists.",
+        )
+    return FileResponse(index_file)
 
 
 # ---------------------------------------------------------------------------
@@ -134,6 +167,7 @@ async def root():
         version="1.0.0",
         docs_url="/docs",
         health_url="/health",
+        ui_url="/ui",
         disclaimer=DISCLAIMER,
     )
 

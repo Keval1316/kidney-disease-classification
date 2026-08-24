@@ -22,8 +22,9 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Copy application source, configuration, and trained model artifact
+# Copy application source, frontend assets, configuration, and trained model artifact
 COPY api/ ./api/
+COPY app/ ./app/
 COPY src/ ./src/
 COPY config/ ./config/
 COPY artifacts/model/best_model.keras ./artifacts/model/best_model.keras

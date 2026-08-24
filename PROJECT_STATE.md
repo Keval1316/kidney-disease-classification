@@ -18,12 +18,11 @@
   - **Data & Pipeline Versioning:** DVC (DagsHub remote storage)
   - **Experiment Tracking:** MLflow (DagsHub hosted MLflow)
   - **Backend Inference API:** FastAPI (Uvicorn)
-  - **Frontend UI:** Streamlit
-  - **Containerization:** Docker (FastAPI inference image)
+  - **Frontend UI:** Modern HTML5 / CSS3 / Vanilla JavaScript UI (Served via FastAPI or Standalone)
+  - **Containerization:** Docker (FastAPI inference + Static Web UI image)
   - **CI/CD:** GitHub Actions (`ci.yml` & `cd.yml`)
   - **Deployment Targets (100% Free-Tier):**
-    - FastAPI Backend $\rightarrow$ Render Free Tier (Docker)
-    - Streamlit UI $\rightarrow$ Streamlit Community Cloud (Calling Render FastAPI)
+    - FastAPI Backend & Web UI $\rightarrow$ Render Free Tier (Docker)
 
 ---
 
@@ -47,15 +46,14 @@
 | **Phase 13** | **Reproducibility** | `dvc repro` verified working | **DONE** |
 | **Phase 14** | **Logging Setup** | `src/utils/logger.py` (Console + Rotating File `logs/kidney_clf.log`) | **DONE** |
 | **Phase 15** | **Inference Module** | `src/inference/predict.py` (Model caching, probability outputs) | **DONE** |
-| **Phase 16** | **FastAPI Service** | `api/main.py` (`/`, `/health`, `/predict`, CORS, Pydantic) | **DONE** |
-| **Phase 17** | **Streamlit UI** | `app/streamlit_app.py` (Interactive UI calling FastAPI) | **DONE** |
+| **Phase 16** | **FastAPI Service** | `api/main.py` (`/`, `/health`, `/predict`, `/ui`, CORS, Pydantic) | **DONE** |
+| **Phase 17** | **Web UI (HTML/CSS/JS)** | `app/index.html`, `app/css/style.css`, `app/js/app.js` (Modern UI) | **DONE** |
 | **Phase 18** | **Dockerization** | `Dockerfile`, `.dockerignore` for FastAPI service | **DONE** |
 | **Phase 19** | **Local Docker Test** | Docker execution guide & health/predict test procedure | **DONE** |
-| **Phase 20** | **Automated Tests** | 15 passing tests across `test_data.py`, `test_model.py`, `test_api.py`, `test_inference.py` | **DONE** |
+| **Phase 20** | **Automated Tests** | 17 passing tests across `test_data.py`, `test_model.py`, `test_api.py`, `test_inference.py` | **DONE** |
 | **Phase 21** | **CI (GitHub Actions)** | `.github/workflows/ci.yml` (Lint, test, smoke train, docker build) | **DONE** |
 | **Phase 22** | **CD (GitHub Actions)** | `.github/workflows/cd.yml` (Deploy to Render via webhook/secrets) | **DONE** |
-| **Phase 23** | **Render Deployment** | Deploy FastAPI Docker container to Render Free Tier | **PENDING** |
-| **Phase 23b** | **Streamlit Deployment** | Deploy Streamlit UI to Streamlit Community Cloud | **PENDING** |
+| **Phase 23** | **Render Deployment** | Deploy FastAPI & Web UI Docker container to Render Free Tier | **PENDING** |
 | **Phase 24** | **Model Strategy** | Lightweight packaging & artifact strategy | **PENDING** |
 | **Phase 25** | **Model Versioning** | Versioning tag & tracking strategy documentation | **PENDING** |
 | **Phase 26** | **Configuration** | `.env`, `.env.example`, environment variables | **PENDING** |
@@ -75,9 +73,14 @@ kidney-disease-classification/
 │       └── cd.yml                  # [CRITICAL] Automatic deployment trigger for Render
 ├── api/
 │   ├── __init__.py
-│   └── main.py                     # [CRITICAL] FastAPI application with /, /health, /predict
+│   └── main.py                     # [CRITICAL] FastAPI application with /, /health, /predict, /ui
 ├── app/
-│   └── streamlit_app.py            # [CRITICAL] Streamlit frontend (Phase 17)
+│   ├── index.html                  # [CRITICAL] Modern HTML5 frontend (Phase 17)
+│   ├── css/
+│   │   └── style.css               # Design system & responsive styles
+│   ├── js/
+│   │   └── app.js                  # Pure JavaScript client & API integration
+│   └── samples/                    # Real 1-click test CT scan slices
 ├── artifacts/
 │   └── model/
 │       ├── best_model.keras        # [CRITICAL] Trained EfficientNetB0 Keras model weights
@@ -125,7 +128,7 @@ kidney-disease-classification/
 │   ├── test_data.py                # Data validation & split leakage tests
 │   ├── test_model.py               # Architecture & smoke-training test
 │   ├── test_inference.py           # Inference engine & probability tests
-│   └── test_api.py                 # FastAPI endpoints & error handling tests
+│   └── test_api.py                 # FastAPI endpoints, static UI & error handling tests
 ├── .dockerignore                    # Excludes datasets, local caches, tests from image
 ├── .env.example
 ├── .gitignore
@@ -151,14 +154,11 @@ kidney-disease-classification/
   ```powershell
   python -m src.inference.predict "data/raw/CT-KIDNEY-DATASET-Normal-Cyst-Tumor-Stone/CT-KIDNEY-DATASET-Normal-Cyst-Tumor-Stone/Tumor/Tumor- (1).jpg"
   ```
-- **Start FastAPI inference backend:**
+- **Start FastAPI inference backend & UI:**
   ```powershell
   uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
   ```
-- **Start Streamlit UI:**
-  ```powershell
-  streamlit run app/streamlit_app.py
-  ```
+  *Open UI in browser:* `http://127.0.0.1:8000/ui`
 - **Build Docker Container:**
   ```powershell
   docker build -t kidney-classifier .
