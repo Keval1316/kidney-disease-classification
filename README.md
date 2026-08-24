@@ -264,7 +264,7 @@ uvicorn api.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
 Once running, access the services:
-- 🌐 **Interactive Diagnostic Web UI:** [http://127.0.0.1:8000/ui](http://127.0.0.1:8000/ui)
+- 🌐 **Interactive Diagnostic Web UI:** [http://127.0.0.1:8000](http://127.0.0.1:8000) (or [http://127.0.0.1:8000/ui](http://127.0.0.1:8000/ui))
 - 📖 **Interactive Swagger API Documentation:** [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 - 🩺 **Health Check Endpoint:** [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health)
 

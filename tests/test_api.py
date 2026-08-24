@@ -39,6 +39,14 @@ def test_root_endpoint(client):
     assert "docs_url" in data
 
 
+def test_root_browser_request_serves_html(client):
+    """GET / with Accept: text/html should return 200 with HTML UI."""
+    response = client.get("/", headers={"accept": "text/html,application/xhtml+xml"})
+    assert response.status_code == 200
+    assert "text/html" in response.headers.get("content-type", "")
+    assert "NephroScan AI" in response.text
+
+
 def test_health_endpoint(client):
     """GET /health should return 200 and healthy status."""
     response = client.get("/health")

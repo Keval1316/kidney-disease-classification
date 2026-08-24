@@ -20,7 +20,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Dict
 
-from fastapi import FastAPI, File, HTTPException, UploadFile, status
+from fastapi import FastAPI, File, HTTPException, Request, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -157,17 +157,25 @@ async def serve_ui():
 
 
 # ---------------------------------------------------------------------------
-# Route: Root
+# Route: Root (Serves Web UI for Browsers, JSON for API Clients)
 # ---------------------------------------------------------------------------
-@app.get("/", response_model=RootResponse, tags=["General"])
-async def root():
-    """Service metadata, documentation links, and medical disclaimer."""
+@app.get("/", tags=["General"], summary="Root Endpoint (Web UI & Service Metadata)")
+async def root(request: Request):
+    """
+    Serve the interactive Web UI when accessed from a web browser,
+    or return JSON service metadata for API clients.
+    """
+    accept = request.headers.get("accept", "")
+    index_file = APP_DIR / "index.html"
+    if "text/html" in accept and index_file.exists():
+        return FileResponse(index_file)
+
     return RootResponse(
         message="CT Kidney Disease Classification API is running.",
         version="1.0.0",
         docs_url="/docs",
         health_url="/health",
-        ui_url="/ui",
+        ui_url="/",
         disclaimer=DISCLAIMER,
     )
 
