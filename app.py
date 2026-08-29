@@ -9,6 +9,12 @@ from pathlib import Path
 import gradio as gr
 from PIL import Image
 
+try:
+    import spaces
+    has_spaces = True
+except ImportError:
+    has_spaces = False
+
 from src.inference.predict import predict_image, CLASS_NAMES
 
 # Clinical descriptions and reference findings
@@ -42,7 +48,7 @@ DISCLAIMER_TEXT = (
 )
 
 
-def classify_ct_scan(image: Image.Image):
+def _predict_handler(image: Image.Image):
     """Run model inference on the uploaded CT slice and return probabilities and clinical report."""
     if image is None:
         return None, "### Please upload an image to analyze."
@@ -71,6 +77,15 @@ def classify_ct_scan(image: Image.Image):
 
     except Exception as exc:
         return None, f"**Error during inference:** {exc}"
+
+
+if has_spaces:
+    @spaces.GPU
+    def classify_ct_scan(image: Image.Image):
+        return _predict_handler(image)
+else:
+    def classify_ct_scan(image: Image.Image):
+        return _predict_handler(image)
 
 
 # Define sample images if available
