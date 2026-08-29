@@ -37,6 +37,3 @@ reports/
 .env
 .env.*
 !.env.example
-
-# App frontend (Streamlit deployed separately on Streamlit Cloud)
-app/

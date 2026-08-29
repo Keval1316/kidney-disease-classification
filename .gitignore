@@ -12,9 +12,13 @@ venv/
 data/raw/
 data/processed/
 data/external/
-artifacts/
+artifacts/*
+!artifacts/model/
+artifacts/model/*
+!artifacts/model/best_model.keras
 *.h5
 *.keras
+!artifacts/model/best_model.keras
 mlruns/
 
 # DVC
