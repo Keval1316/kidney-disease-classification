@@ -2,7 +2,7 @@
 title: NephroScan AI - CT Kidney Disease Classification
 emoji: 🫁
 colorFrom: indigo
-colorTo: cyan
+colorTo: blue
 sdk: gradio
 sdk_version: 4.38.0
 app_file: app.py
