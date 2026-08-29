@@ -1,3 +1,14 @@
+---
+title: NephroScan AI - CT Kidney Disease Classification
+emoji: 🫁
+colorFrom: indigo
+colorTo: cyan
+sdk: docker
+app_port: 7860
+pinned: false
+license: mit
+---
+
 # NephroScan AI: CT Kidney Disease Classification & Diagnostic System
 
 [![Python Version](https://img.shields.io/badge/Python-3.11%20%7C%203.12-blue?logo=python&logoColor=white)](https://www.python.org/)
